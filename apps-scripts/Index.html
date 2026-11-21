@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f5f9;
+      color: #202124;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 220px;
+      background: #172238;
+      color: white;
+      padding: 24px 14px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 19px;
+      font-weight: bold;
+      margin: 0 0 30px 8px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav button {
+      background: transparent;
+      border: none;
+      color: #d4dbe8;
+      text-align: left;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #2b3a55;
+      color: white;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .header { margin-bottom: 25px; }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .stat-number {
+      font-size: 27px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .refresh-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .refresh-button {
+      border: 1px solid #d1d5db;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 300px minmax(0,1fr);
+      gap: 16px;
+      min-height: 600px;
+    }
+
+    .list-panel,
+    .detail-panel {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
+
+    .list-panel { padding: 12px; }
+    .detail-panel { padding: 24px; }
+
+    .list-title {
+      padding: 8px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .email-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .email-card {
+      padding: 14px 12px;
+      border-radius: 9px;
+      border-bottom: 1px solid #e5e7eb;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .email-card:hover { background: #f8fafc; }
+
+    .email-card.selected {
+      background: #eef3ff;
+      border-left: 3px solid #4776e6;
+    }
+
+    .email-sender {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+
+    .email-subject {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .email-summary {
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      background: #e5e7eb;
+      color: #374151;
+      margin-right: 4px;
+      margin-top: 3px;
+    }
+
+    .priority-high,
+    .priority-urgent {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .priority-medium {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .priority-low {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .empty {
+      color: #64748b;
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    .detail-header h2 {
+      font-size: 21px;
+      margin: 0 0 10px;
+      line-height: 1.4;
+    }
+
+    .detail-meta {
+      color: #64748b;
+      font-size: 13px;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .section { margin-top: 20px; }
+
+    .section h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .content-box {
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 9px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .action-list {
+      padding-left: 20px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 240px;
+      resize: vertical;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #4776e6;
+      box-shadow: 0 0 0 2px rgba(71,118,230,.1);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-success { background: #15803d; color: white; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+
+    .message {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .message.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .message.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .message.info {
+      display: block;
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1000px) {
+      .workspace { grid-template-columns: 250px minmax(0,1fr); }
+      .main { padding: 18px; }
+    }
+
+    @media (max-width: 750px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; padding: 15px; }
+      .logo { margin-bottom: 15px; }
+
+      .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .nav button { flex: 1; }
+      .workspace { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .detail-panel { padding: 18px; }
+    }
+
+    /* Custom modal and toast UI */
+    .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.48); display:none; align-items:center; justify-content:center; z-index:9999; padding:20px; backdrop-filter:blur(3px); }
+    .modal-overlay.open { display:flex; }
+    .modal { width:min(460px,100%); background:#fff; border-radius:16px; padding:24px; box-shadow:0 24px 70px rgba(15,23,42,.25); animation:modalIn .18s ease-out; }
+    @keyframes modalIn { from {opacity:0;transform:translateY(8px) scale(.98)} to {opacity:1;transform:translateY(0) scale(1)} }
+    .modal-icon { width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef2ff;color:#3b5ccc;font-size:22px;margin-bottom:14px; }
+    .modal-icon.danger { background:#fee2e2;color:#b91c1c; } .modal-icon.success {background:#dcfce7;color:#166534;}
+    .modal h2 {font-size:19px;margin:0 0 9px;color:#1f2937;} .modal p {font-size:14px;line-height:1.6;color:#64748b;margin:0;white-space:pre-wrap;word-break:break-word;}
+    .modal-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+    .modal-actions button {border:0;border-radius:8px;padding:10px 15px;font-weight:600;cursor:pointer;}
+    .modal-cancel {background:#e5e7eb;color:#374151;} .modal-confirm {background:#2563eb;color:#fff;} .modal-confirm.danger {background:#dc2626;} .modal-confirm.success {background:#15803d;}
+    .toast-container {position:fixed;right:22px;top:22px;z-index:10000;display:flex;flex-direction:column;gap:10px;}
+    .toast {background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:10px;padding:13px 16px;box-shadow:0 10px 30px rgba(15,23,42,.12);max-width:min(420px,calc(100vw - 40px));font-size:14px;color:#334155;animation:toastIn .2s ease-out;}
+    .toast.success {border-left-color:#16a34a;} .toast.error {border-left-color:#dc2626;} .toast.info {border-left-color:#0284c7;}
+    @keyframes toastIn {from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:750px){.modal-actions{flex-direction:column-reverse}.modal-actions button{width:100%}.toast-container{left:15px;right:15px;top:15px}}
+
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo">✉ AI Mail</div>
+
+    <div class="nav">
+      <button class="active" data-view="Dashboard"
+        onclick="changeView('Dashboard', this)">Dashboard</button>
+
+      <button data-view="Pending"
+        onclick="changeView('Pending', this)">Review Queue</button>
+
+      <button data-view="Sent"
+        onclick="changeView('Sent', this)">Sent Emails</button>
+
+      <button data-view="Rejected"
+        onclick="changeView('Rejected', this)">Rejected</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="header">
+      <h1>AI Email Management</h1>
+      <p>Review AI-generated email responses before sending.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Emails</div>
+        <div class="stat-number" id="totalCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Pending Review</div>
+        <div class="stat-number" id="pendingCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Sent</div>
+        <div class="stat-number" id="sentCount">0</div>
+      </div>
+    </div>
+
+    <div class="refresh-row">
+      <div id="viewTitle"><strong>Dashboard</strong></div>
+      <button class="refresh-button" onclick="loadEmails()">↻ Refresh</button>
+    </div>
+
+    <div class="workspace">
+
+      <div class="list-panel">
+        <div class="list-title">Email Records</div>
+
+        <div id="emailList" class="email-list">
+          <div class="loading">Loading emails...</div>
+        </div>
+      </div>
+
+      <div class="detail-panel" id="detailPanel">
+        <div class="empty">Select an email to review.</div>
+      </div>
+
+    </div>
+
+    <div class="footer-note">
+      AI-generated responses are reviewed and approved by a human before sending.
+    </div>
+
+  </main>
+</div>
+
+
+
+<div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div id="modalIcon" class="modal-icon">?</div>
+    <h2 id="modalTitle">Confirm action</h2>
+    <p id="modalMessage"></p>
+    <div class="modal-actions">
+      <button id="modalCancel" class="modal-cancel">Cancel</button>
+      <button id="modalConfirm" class="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<script>
+  let emails = [];
+  let selectedEmailId = null;
+  let currentView = 'Dashboard';
+  let isBusy = false;
+
+
+
+  function showToast(message, type='info') {
+    const container=document.getElementById('toastContainer');
+    const toast=document.createElement('div'); toast.className='toast '+type; toast.textContent=message;
+    container.appendChild(toast); window.setTimeout(()=>toast.remove(),4200);
+  }
+  function showConfirm({title='Confirm action',message='',confirmLabel='Confirm',variant='primary',icon='?',}) {
+    return new Promise(resolve=>{
+      const overlay=document.getElementById('modalOverlay'), titleEl=document.getElementById('modalTitle'), messageEl=document.getElementById('modalMessage'), iconEl=document.getElementById('modalIcon'), cancel=document.getElementById('modalCancel'), confirmBtn=document.getElementById('modalConfirm');
+      titleEl.textContent=title; messageEl.textContent=message; iconEl.textContent=icon; iconEl.className='modal-icon '+(variant==='danger'?'danger':variant==='success'?'success':'');
+      confirmBtn.textContent=confirmLabel; confirmBtn.className='modal-confirm '+variant; overlay.classList.add('open');
+      const finish=value=>{overlay.classList.remove('open');cancel.onclick=null;confirmBtn.onclick=null;overlay.onclick=null;document.onkeydown=null;resolve(value);};
+      cancel.onclick=()=>finish(false); confirmBtn.onclick=()=>finish(true); overlay.onclick=e=>{if(e.target===overlay)finish(false);}; document.onkeydown=e=>{if(e.key==='Escape')finish(false);}; confirmBtn.focus();
+    });
+  }
+
+  // =========================
+  // UTILITIES
+  // =========================
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizeStatus(value) {
+    return String(value || 'Pending').trim().toLowerCase();
+  }
+
+  function normalizePriority(value) {
+    return String(value || 'Medium').trim().toLowerCase();
+  }
+
+  function getStatus(email) {
+    return String(email['Approval Status'] || 'Pending').trim();
+  }
+
+  function getEmailId(email) {
+    return String(email['Email ID'] || '');
+  }
+
+  function getSelectedEmail() {
+    return emails.find(e => getEmailId(e) === selectedEmailId);
+  }
+
+  function setBusy(value) {
+    isBusy = value;
+
+    ['saveBtn', 'rejectBtn', 'sendBtn', 'restoreBtn'].forEach(id => {
+      const button = document.getElementById(id);
+      if (button) button.disabled = value;
+    });
+  }
+
+
+  // =========================
+  // FILTERS
+  // =========================
+
+  function getVisibleEmails() {
+    if (currentView === 'Pending') {
+      return emails.filter(e => {
+        const status = normalizeStatus(getStatus(e));
+        return status === 'pending' || status === 'send failed';
+      });
+    }
+
+    if (currentView === 'Sent') {
+      return emails.filter(e =>
+        normalizeStatus(getStatus(e)) === 'sent'
+      );
+    }
+
+    if (currentView === 'Rejected') {
+      return emails.filter(e =>
+        normalizeStatus(getStatus(e)) === 'rejected'
+      );
+    }
+
+    // Dashboard: show all except records actively being sent
+    return emails.filter(e =>
+      normalizeStatus(getStatus(e)) !== 'sending'
+    );
+  }
+
+  function isVisible(email) {
+    return getVisibleEmails().some(
+      e => getEmailId(e) === getEmailId(email)
+    );
+  }
+
+
+  // =========================
+  // LOAD DATA
+  // =========================
+
+  function loadEmails() {
+    const list = document.getElementById('emailList');
+
+    list.innerHTML =
+      '<div class="loading">Loading email records...</div>';
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        emails = Array.isArray(data) ? data : [];
+
+        updateStats();
+        renderList();
+
+        if (selectedEmailId) {
+          const selected = getSelectedEmail();
+
+          if (selected && isVisible(selected)) {
+            renderDetail(selected);
+          } else {
+            selectedEmailId = null;
+            renderEmptyDetail();
+          }
+        } else {
+          renderEmptyDetail();
+        }
+      })
+      .withFailureHandler(function(error) {
+        list.innerHTML =
+          '<div class="empty">Failed to load emails.</div>';
+
+        renderEmptyDetail();
+
+        showToast('Failed to load emails: ' + (error.message || error), 'error');
+      })
+      .getEmails();
+  }
+
+
+  // =========================
+  // STATS
+  // =========================
+
+  function updateStats() {
+    document.getElementById('totalCount').textContent =
+      emails.length;
+
+    document.getElementById('pendingCount').textContent =
+      emails.filter(e => {
+        const status = normalizeStatus(getStatus(e));
+        return status === 'pending' || status === 'send failed';
+      }).length;
+
+    document.getElementById('sentCount').textContent =
+      emails.filter(e =>
+        normalizeStatus(getStatus(e)) === 'sent'
+      ).length;
+  }
+
+
+  // =========================
+  // NAVIGATION
+  // =========================
+
+  function changeView(view, button) {
+    currentView = view;
+
+    document.querySelectorAll('.nav button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    if (button) button.classList.add('active');
+
+    document.getElementById('viewTitle').innerHTML =
+      '<strong>' +
+      escapeHtml(view === 'Pending' ? 'Review Queue' : view) +
+      '</strong>';
+
+    renderList();
+
+    const selected = getSelectedEmail();
+
+    if (selected && isVisible(selected)) {
+      renderDetail(selected);
+    } else {
+      selectedEmailId = null;
+      renderEmptyDetail();
+    }
+  }
+
+
+  // =========================
+  // LIST RENDERING
+  // =========================
+
+  function renderList() {
+    const list = document.getElementById('emailList');
+    const visibleEmails = getVisibleEmails();
+
+    if (!visibleEmails.length) {
+      list.innerHTML =
+        '<div class="empty">No emails in this view.</div>';
+      return;
+    }
+
+    list.innerHTML = visibleEmails.map(email => {
+      const id = getEmailId(email);
+      const priority = normalizePriority(email['Priority']);
+      const selected = id === selectedEmailId ? 'selected' : '';
+
+      return `
+        <div class="email-card ${selected}"
+             data-email-id="${escapeHtml(id)}">
+
+          <div class="email-sender">
+            ${escapeHtml(
+              email['Sender Name'] ||
+              email['Sender Email'] ||
+              'Unknown sender'
+            )}
+          </div>
+
+          <div class="email-subject">
+            ${escapeHtml(email['Subject'] || '(No subject)')}
+          </div>
+
+          <span class="badge priority-${escapeHtml(priority)}">
+            ${escapeHtml(email['Priority'] || 'Medium')}
+          </span>
+
+          <span class="badge">
+            ${escapeHtml(getStatus(email))}
+          </span>
+
+          <div class="email-summary">
+            ${escapeHtml(email['Summary'] || 'No summary available.')}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach event handlers without embedding email IDs in JS code.
+    list.querySelectorAll('.email-card').forEach(card => {
+      card.addEventListener('click', function() {
+        selectEmail(card.dataset.emailId);
+      });
+    });
+  }
+
+
+  // =========================
+  // EMAIL SELECTION
+  // =========================
+
+  function selectEmail(id) {
+    selectedEmailId = String(id);
+
+    const email = getSelectedEmail();
+
+    if (!email) {
+      renderEmptyDetail();
+      return;
+    }
+
+    renderList();
+    renderDetail(email);
+  }
+
+
+  // =========================
+  // DETAIL RENDERING
+  // =========================
+
+  function renderEmptyDetail() {
+    document.getElementById('detailPanel').innerHTML =
+      '<div class="empty">Select an email to review.</div>';
+  }
+
+  function renderDetail(email) {
+    const panel = document.getElementById('detailPanel');
+    const status = getStatus(email);
+    const normalized = normalizeStatus(status);
+
+    let actions = '';
+
+    if (normalized === 'pending' || normalized === 'send failed') {
+      actions = `
+        <div class="button-row">
+
+          <button class="btn btn-secondary"
+                  id="saveBtn"
+                  onclick="saveDraft()">
+            Save Changes
+          </button>
+
+          <button class="btn btn-danger"
+                  id="rejectBtn"
+                  onclick="rejectSelected()">
+            Reject
+          </button>
+
+          <button class="btn btn-success"
+                  id="sendBtn"
+                  onclick="approveAndSend()">
+            Approve &amp; Send
+          </button>
+
+        </div>
+      `;
+    } else if (normalized === 'rejected') {
+      actions = `
+        <div class="button-row">
+          <button class="btn btn-secondary"
+                  id="restoreBtn"
+                  onclick="restoreToPending()">
+            Restore to Review Queue
+          </button>
+        </div>
+      `;
+    } else if (normalized === 'sent') {
+      actions = `
+        <div class="button-row">
+          <span class="badge">This email has been sent.</span>
+        </div>
+      `;
+    } else if (normalized === 'sending') {
+      actions = `
+        <div class="button-row">
+          <span class="badge">Sending in progress</span>
+        </div>
+      `;
+    }
+
+    panel.innerHTML = `
+      <div class="detail-header">
+        <h2>${escapeHtml(email['Subject'] || '(No subject)')}</h2>
+
+        <div class="detail-meta">
+          ${escapeHtml(email['Sender Name'] || '')}
+          ${
+            email['Sender Email']
+              ? ' • ' + escapeHtml(email['Sender Email'])
+              : ''
+          }
+          <br>
+          <span class="badge">${escapeHtml(status)}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>AI Summary</h3>
+        <div class="content-box">
+          ${escapeHtml(email['Summary'] || 'No summary available.')}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Category</h3>
+        <div class="content-box">
+          ${escapeHtml(email['Category'] || 'Uncategorized')}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Priority</h3>
+        <div class="content-box">
+          ${escapeHtml(email['Priority'] || 'Medium')}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Deadline</h3>
+        <div class="content-box">
+          ${escapeHtml(email['Deadline'] || 'No deadline specified')}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Action Items</h3>
+        <div id="actionItems"></div>
+      </div>
+
+      <div class="section">
+        <h3>Original Email</h3>
+        <div class="content-box">
+          ${escapeHtml(email['Email Content'] || 'No email content available.')}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>AI-Generated Reply</h3>
+
+        <textarea id="replyEditor"
+          ${
+            normalized === 'sent' || normalized === 'sending'
+              ? 'disabled'
+              : ''
+          }
+          placeholder="No reply draft available.">${
+            escapeHtml(email['Reply Draft'] || '')
+          }</textarea>
+
+        ${actions}
+      </div>
+
+      <div id="detailMessage" class="message"></div>
+    `;
+
+    renderActionItems(email['Action Items']);
+  }
+
+
+  // =========================
+  // ACTION ITEMS
+  // =========================
+
+  function renderActionItems(value) {
+    const container = document.getElementById('actionItems');
+
+    if (!container) return;
+
+    let items = [];
+
+    if (Array.isArray(value)) {
+      items = value;
+    } else if (typeof value === 'string' && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+
+        if (Array.isArray(parsed)) {
+          items = parsed;
+        } else {
+          items = value.split(/[,;\n]/)
+            .map(x => x.trim())
+            .filter(Boolean);
+        }
+      } catch (e) {
+        items = value.split(/[,;\n]/)
+          .map(x => x.trim())
+          .filter(Boolean);
+      }
+    }
+
+    if (!items.length) {
+      container.innerHTML =
+        '<div class="content-box">No action items identified.</div>';
+      return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'action-list';
+
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = String(item);
+      ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
+  }
+
+
+  // =========================
+  // MESSAGE HELPERS
+  // =========================
+
+  function showDetailMessage(message, type) {
+    const element = document.getElementById('detailMessage');
+
+    if (!element) {
+      showToast(message, type || 'info');
+      return;
+    }
+
+    element.className = 'message ' + type;
+    element.textContent = message;
+  }
+
+  function getCurrentReply() {
+    const editor = document.getElementById('replyEditor');
+
+    if (!editor) {
+      throw new Error('Reply editor not found.');
+    }
+
+    return editor.value;
+  }
+
+
+  // =========================
+  // SAVE DRAFT
+  // =========================
+
+  function saveDraft() {
+    if (isBusy) return;
+
+    const email = getSelectedEmail();
+
+    if (!email) {
+      showToast('Please select an email first.', 'info');
+      return;
+    }
+
+    let reply;
+
+    try {
+      reply = getCurrentReply();
+    } catch (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+
+    setBusy(true);
+    showDetailMessage('Saving draft...', 'info');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        setBusy(false);
+
+        // Update local record. Do not reload the dataset.
+        email['Reply Draft'] = reply;
+        email['Approval Status'] = 'Pending';
+
+        // Keep the same record selected and visible.
+        updateStats();
+        renderList();
+        renderDetail(email);
+
+        showDetailMessage(
+          result.message || 'Draft saved successfully.',
+          'success'
+        );
+      })
+      .withFailureHandler(function(error) {
+        setBusy(false);
+
+        showDetailMessage(
+          'Save failed: ' + (error.message || error),
+          'error'
+        );
+      })
+      .saveReplyDraft(getEmailId(email), reply);
+  }
+
+
+  // =========================
+  // REJECT
+  // =========================
+
+  function rejectSelected() {
+    if (isBusy) return;
+
+    const email = getSelectedEmail();
+
+    if (!email) return;
+
+    showConfirm({title:'Reject this email?', message:'This draft will be moved out of your Review Queue. You can restore it later from Rejected.', confirmLabel:'Reject email', variant:'danger', icon:'⚠'}).then(confirmed=>{
+      if (!confirmed) return;
+      continueReject(email);
+    });
+    return;
+  }
+
+  function continueReject(email) {
+
+    setBusy(true);
+    showDetailMessage('Rejecting email...', 'info');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        setBusy(false);
+
+        email['Approval Status'] = 'Rejected';
+
+        updateStats();
+        renderList();
+
+        if (currentView === 'Pending') {
+          selectedEmailId = null;
+          renderEmptyDetail();
+        } else {
+          renderDetail(email);
+          showDetailMessage(
+            result.message || 'Email rejected.',
+            'success'
+          );
+        }
+      })
+      .withFailureHandler(function(error) {
+        setBusy(false);
+
+        showDetailMessage(
+          'Reject failed: ' + (error.message || error),
+          'error'
+        );
+      })
+      .rejectEmail(getEmailId(email));
+  }
+
+
+  // =========================
+  // APPROVE AND SEND
+  // =========================
+
+  function approveAndSend() {
+    if (isBusy) return;
+
+    const email = getSelectedEmail();
+
+    if (!email) return;
+
+    let reply;
+
+    try {
+      reply = getCurrentReply();
+    } catch (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+
+    if (!reply.trim()) {
+      showToast('The reply cannot be empty.', 'error');
+      return;
+    }
+
+    const recipient = email['Sender Email'] || '';
+
+    showConfirm({title:'Send this reply?', message:'Recipient: '+recipient+'\nSubject: Re: '+(email['Subject']||'')+'\n\nThis sends your edited reply in the original Gmail thread. This action cannot be undone.', confirmLabel:'Approve & Send', variant:'success', icon:'✉'}).then(confirmed=>{
+      if (!confirmed) return;
+      continueSend(email, reply);
+    });
+    return;
+  }
+
+  function continueSend(email, reply) {
+
+    setBusy(true);
+    showDetailMessage('Sending reply...', 'info');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        setBusy(false);
+
+        email['Reply Draft'] = reply;
+        email['Approval Status'] = 'Sent';
+
+        updateStats();
+        renderList();
+
+        if (currentView === 'Pending') {
+          selectedEmailId = null;
+          renderEmptyDetail();
+        } else {
+          renderDetail(email);
+          showDetailMessage(
+            result.message || 'Reply sent successfully.',
+            'success'
+          );
+        }
+      })
+      .withFailureHandler(function(error) {
+        setBusy(false);
+
+        email['Approval Status'] = 'Send Failed';
+
+        updateStats();
+        renderList();
+        renderDetail(email);
+
+        showDetailMessage(
+          'Sending failed: ' + (error.message || error),
+          'error'
+        );
+      })
+      .sendApprovedEmail(getEmailId(email), reply);
+  }
+
+
+  // =========================
+  // RESTORE
+  // =========================
+
+  function restoreToPending() {
+    if (isBusy) return;
+
+    const email = getSelectedEmail();
+
+    if (!email) return;
+
+    showConfirm({title:'Restore email?', message:'This email will return to the Review Queue so you can review its reply draft again.', confirmLabel:'Restore email', variant:'success', icon:'↩'}).then(confirmed=>{
+      if (!confirmed) return;
+      continueRestore(email);
+    });
+    return;
+  }
+
+  function continueRestore(email) {
+
+    setBusy(true);
+
+    showDetailMessage('Restoring email...', 'info');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        setBusy(false);
+
+        email['Approval Status'] = 'Pending';
+
+        updateStats();
+        renderList();
+        renderDetail(email);
+
+        showDetailMessage(
+          result.message || 'Email restored.',
+          'success'
+        );
+      })
+      .withFailureHandler(function(error) {
+        setBusy(false);
+
+        showDetailMessage(
+          'Restore failed: ' + (error.message || error),
+          'error'
+        );
+      })
+      .saveReplyDraft(getEmailId(email), email['Reply Draft'] || '');
+  }
+
+
+  // =========================
+  // START
+  // =========================
+
+  loadEmails();
+
+</script>
+</body>
+</html>

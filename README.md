@@ -32,20 +32,22 @@ The project follows a **human-in-the-loop approach**: AI assists with email mana
 
 ## System Architecture
 
+## System Architecture
+
 ```mermaid
 flowchart TD
-    A[Gmail Inbox] --> B[Make Automation]
-    B --> C[Email Filtering]
-    C --> D[AI Email Analysis]
-    D --> E[JSON Parsing]
-    E --> F[Google Sheets]
-    F --> G[AI Reply Generation]
-    G --> H[Google Sheets Update]
-    H --> I[Apps Script Dashboard]
-    I --> J[Human Review]
-    J --> K{Decision}
-    K -->|Approve| L[Gmail Reply]
-    K -->|Reject| M[Rejected]
+    A["Gmail Inbox"] --> B["Make Automation"]
+    B --> C["Email Filtering"]
+    C --> D["AI Email Analysis"]
+    D --> E["JSON Parsing"]
+    E --> F["Google Sheets"]
+    F --> G["AI Reply Generation"]
+    G --> H["Google Sheets Update"]
+    H --> I["Apps Script Dashboard"]
+    I --> J["Human Review"]
+    J --> K{"Decision"}
+    K -->|Approve| L["Gmail Reply"]
+    K -->|Reject| M["Rejected"]
     J -->|Edit and Save| I
 ```
 
